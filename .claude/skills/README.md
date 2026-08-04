@@ -6,14 +6,21 @@ imported skills below were flattened out of their upstream category tree.
 
 ## Origin
 
+This skill set is curated and maintained by Alfredo Alea for
+`claude-assisted-coding-template`. Selection, the Windows/Claude Code porting
+work, and the *Local edits* below are the template's contribution; the imported
+skills themselves are not.
+
 | Skill | Source |
 |---|---|
 | `frontend-design` | this template |
 | everything else | [davidondrej/skills](https://github.com/davidondrej/skills) |
 
 The imported skills are MIT-licensed, © 2026 David Ondrej — full text in
-[`LICENSE-davidondrej-skills`](LICENSE-davidondrej-skills). Several were edited
-for this template; see *Local edits* below.
+[`LICENSE-davidondrej-skills`](LICENSE-davidondrej-skills). That copyright line
+stays put: MIT permits modifying and redistributing the files, on the condition
+that the notice travels with them. See [`../../NOTICE`](../../NOTICE) for the
+split between template-authored and bundled work.
 
 ## What was imported, and what was not
 
