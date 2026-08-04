@@ -1,0 +1,3 @@
+# Hooks run under Git Bash; CRLF breaks the shebang and line parsing.
+*.sh text eol=lf
+*.py text eol=lf

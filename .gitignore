@@ -1,0 +1,11 @@
+# Machine- and account-local Claude Code preferences (model, permission mode,
+# allowlist). Not part of the template.
+.claude/settings.local.json
+
+# Node
+node_modules/
+
+# Secrets
+.env
+.env.*
+!.env.example
