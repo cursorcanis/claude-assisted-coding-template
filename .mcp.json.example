@@ -1,0 +1,19 @@
+{
+  "_comment": [
+    "Copy to .mcp.json to enable. Project-scoped MCP servers are shared with",
+    "everyone who clones this repo, so every entry here is a supply-chain",
+    "decision: the server sees whatever Claude passes it.",
+    "",
+    "Never put a literal secret in this file. Use ${VAR} and set the variable",
+    "in your own environment -- .mcp.json is committed, your shell is not."
+  ],
+  "mcpServers": {
+    "example-disabled": {
+      "command": "npx",
+      "args": ["-y", "@example/mcp-server"],
+      "env": {
+        "EXAMPLE_TOKEN": "${EXAMPLE_TOKEN}"
+      }
+    }
+  }
+}

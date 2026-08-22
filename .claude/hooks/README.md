@@ -1,67 +1,102 @@
-# Claude Code hooks in this repo
+# Hooks
 
-What is wired, why, and how to change it.
-
-## What is active
+Hooks run whatever Claude decides, so they are the enforcement layer. This
+directory holds three, wired in [`../settings.json`](../settings.json).
 
 | Event | Matcher | Script | Effect |
 |---|---|---|---|
-| PreToolUse | `Bash\|PowerShell` | `guard_commands.py` | Denies secret-leaking / history-rewriting commands; asks before destructive ones |
-| PreToolUse | `Write\|Edit` | `guard_writes.py` | Denies edits to credential files |
-| PostToolUse | `Write\|Edit` | `verify_ts.sh` | `tsc --noEmit` after a `.ts/.tsx` edit (async; speaks only on failure) |
+| `SessionStart` | `startup\|resume` | `session_context.sh` | Injects branch, dirty-file count and detected stack |
+| `PreToolUse` | `Bash\|PowerShell` | `guard_commands.sh` → `.py` | Denies credential reads/copies/uploads; asks before destructive commands |
+| `PostToolUse` | `Write\|Edit` | `verify.sh` | Runs the project's own type/lint check; async, silent unless it fails |
 
-All three live in **`.claude/settings.json`** (committed). They are portable: the
-guards only inspect strings, and the verifier resolves the project root from its
-own location rather than hardcoding a path.
+## What changed in v2, and why
 
-**`.claude/settings.local.json`** (gitignore this) holds only machine and
-account preferences — model, permission mode, allowlist. No hooks.
+**The credential guard is no longer a hook.** It is
+`permissions.deny` in `settings.json`. Claude Code enforces those rules
+natively — including against `cat`, `head`, `tail` and `sed` inside Bash — with
+no Python in the loop. The previous version reimplemented this in a regex and
+missed `cp`, `grep`, `awk`, `printenv`, `scp`, `.env.staging`, and
+`~/.ssh/id_ed25519`, all of which are now closed.
 
-## Why these particular rules
+`guard_writes.py` is gone entirely: `Edit(...)` deny rules replace it and cover
+strictly more.
 
-Generic hook advice ("block `rm -rf`, lint on save") is mostly noise. These
-target what this repo can actually lose:
+**The guard that remains covers only what rules cannot express.** A deny rule
+is all-or-nothing, so `Read(.env.*)` would also block `.env.example`. And a
+read-oriented rule never sees `cp .env /tmp/x` or `curl -d @.env`, which move
+the secret without printing it. Those two gaps are the whole remaining job.
 
-- **Dotenv files and key material → `deny` on read-to-stdout and on write.**
-  Printing one into a transcript leaks it, and transcripts are long-lived.
-  `.env.example` is deliberately *not* protected — keeping it current is normal
-  work.
-- **Force-push → `deny`.** Rewrites published history. Revert instead.
-- **`git reset --hard`, `git clean -f`, recursive `rm` → `ask`.** All have
-  legitimate uses, so they prompt rather than block.
-- **`tsc` after edits.** `asyncRewake`, so it never blocks an edit and stays
-  silent while the code compiles — it interrupts only when something broke.
+**The verifier is no longer TypeScript-only.** `verify.sh` detects the stack
+from marker files (`tsconfig.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`,
+`*.sln`) and runs the matching check. A repo with none of them stays silent.
 
-`verify_ts.sh` no-ops until the project actually has a `tsconfig.json` and a
-local `typescript` install. Until then it is silent by design, not broken.
+**The interpreter is resolved, not assumed.** The old hooks invoked `python`.
+Where only `python3` exists the hook errored and the command proceeded
+unguarded — the identical fail-open trap that made the upstream `jq` hooks
+useless in Git Bash. `guard_commands.sh` tries `python3`, `python`, then `py -3`,
+and if none exists says so on the transcript rather than failing silently. That
+degradation is acceptable now precisely because the permission rules, not this
+script, are the floor.
+
+## Honest limits
+
+The guard is a regex over a command string. It raises the cost of a mistake; it
+is not a boundary. It does not stop:
+
+```bash
+python -c "print(open('.env').read())"   # subprocess opens the file itself
+```
+
+`permissions.deny` does not stop that either — the docs are explicit that file
+rules do not reach arbitrary subprocesses. For an actual boundary, enable
+[the sandbox](https://code.claude.com/docs/en/sandboxing), which enforces at
+the kernel.
+
+Write guards accordingly: prefer `ask` over `deny` wherever a command has a
+legitimate use. A guard that fires constantly trains you to approve without
+reading, which is worse than no guard.
 
 ## Editing the rules
 
-Patterns live in the `DENY` / `ASK` lists in `guard_commands.py` and `PROTECTED`
-in `guard_writes.py`. After any change, re-run the pipe tests:
+Patterns live in `DENY` / `ASK` in `guard_commands.py`. Path rules live in
+`permissions` in `settings.json` — prefer adding there, since it needs no
+interpreter and is enforced natively.
+
+Both `.claude/settings.json` and `.claude/hooks/**` are in `permissions.ask`,
+so Claude prompts before changing its own constraints. That is deliberate; the
+previous version let an agent silently disable its own guards.
+
+After any change, run the regression suite:
 
 ```bash
-echo '{"tool_input":{"command":"cat .env.local"}}' | python .claude/hooks/guard_commands.py
-echo '{"tool_input":{"file_path":"src/.env"}}'     | python .claude/hooks/guard_writes.py
+python3 .claude/hooks/tests/test_guard.py
 ```
 
-Empty output = no opinion (command proceeds under normal permission rules).
-Otherwise it prints a `permissionDecision` of `deny` or `ask`.
+Or spot-check by hand:
 
-A guard that is too aggressive is worse than none — it trains you to approve
-without reading. Prefer `ask` over `deny` whenever a command has any legitimate
-use in this project.
+```bash
+echo '{"tool_input":{"command":"cat .env"}}'    | bash guard_commands.sh   # deny
+echo '{"tool_input":{"command":"cp .env /tmp"}}' | bash guard_commands.sh  # deny
+echo '{"tool_input":{"command":"cat .env.example"}}' | bash guard_commands.sh  # empty
+```
 
-## Notes for this machine
+Empty output means no opinion, and the command proceeds under normal
+permission rules.
 
-- **No `jq`.** Git Bash here ships without it, so the jq one-liners in most hook
-  documentation silently produce nothing. These hooks parse stdin with `python`
-  (3.12, on PATH) instead.
+## Plugin mode
+
+`hooks.json` is the same wiring with `${CLAUDE_PLUGIN_ROOT}` in place of
+`${CLAUDE_PROJECT_DIR}`, used when this repo is installed as a plugin rather
+than cloned. Enable one path or the other — with both active the hooks run
+twice, since plugin hooks are not deduplicated against settings hooks.
+
+## Notes for Windows
+
+- **No `jq`.** Git Bash ships without it, which is why these parse JSON with
+  Python.
 - **Hooks run in Git Bash**, not PowerShell. Paths arrive Windows-style
-  (`c:/...`).
-- **Config changes need a reload.** The settings watcher only tracks directories
-  that had a settings file at session start. If a hook edit seems inert, open
-  `/hooks` once or restart the session.
+  (`c:/...`); the guard normalises separators before matching.
+- **Config changes need a reload.** Open `/hooks` once, or restart the session.
 
-Authoritative reference: `/hooks` in-session, or the hook schema in Claude Code's
-settings documentation.
+Authoritative reference: `/hooks` in-session, or
+<https://code.claude.com/docs/en/hooks>.

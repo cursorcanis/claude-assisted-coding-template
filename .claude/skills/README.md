@@ -1,78 +1,85 @@
 # Skills in this template
 
 Claude Code discovers skills at `.claude/skills/<name>/SKILL.md` — **flat**, one
-folder per skill. Nested category folders are not scanned, which is why the
+directory per skill. Nested category folders are not scanned, which is why the
 imported skills below were flattened out of their upstream category tree.
 
 ## Origin
 
-This skill set is curated and maintained by Alfredo Alea for
-`claude-assisted-coding-template`. Selection, the Windows/Claude Code porting
-work, and the *Local edits* below are the template's contribution; the imported
-skills themselves are not.
-
 | Skill | Source |
 |---|---|
 | `frontend-design` | this template |
-| everything else | [davidondrej/skills](https://github.com/davidondrej/skills) |
+| everything else | [davidondrej/skills](https://github.com/davidondrej/skills), pinned in [`UPSTREAM.lock`](UPSTREAM.lock) |
 
-The imported skills are MIT-licensed, © 2026 David Ondrej — full text in
+Imported skills are MIT-licensed, © 2026 David Ondrej — full text in
 [`LICENSE-davidondrej-skills`](LICENSE-davidondrej-skills). That copyright line
 stays put: MIT permits modifying and redistributing the files, on the condition
 that the notice travels with them. See [`../../NOTICE`](../../NOTICE) for the
 split between template-authored and bundled work.
 
-## What was imported, and what was not
+## Why the upstream is pinned
 
-Imported: the subset that runs as-is on Windows + Claude Code with no external
-account.
+Vendored skills are a supply chain. Every model-invocable skill's description
+is loaded into the prompt of every session, and its body is loaded whenever
+Claude judges it relevant — so an upstream edit changes how your agent behaves,
+silently, in every project that cloned this template.
 
-    agent-self-scheduling   before-building     brain-to-docs
-    create-readonly-db-role decisions           effective-agent-skills
-    folder-specific-claude-and-agents-md        git-worktree
-    goal-loop               google-safe-browsing  handoff
-    launch-subagent         level-up            next-decision
-    prompt-me               read-all-adrs       remind
-    research-prompt         save-idea           setup-help
-    short                   teach
+[`UPSTREAM.lock`](UPSTREAM.lock) records the exact commit these came from and
+the command to diff against it. Do not pull an update without reading the diff.
+The bundled `config-auditor` subagent exists for exactly this review.
 
-Deliberately skipped, and why:
+## Context cost, and what was done about it
 
-- **macOS-only** — `cmux`, `anti-sleep` (`caffeinate`), `macbook-metrics-setup`,
-  `nuke-cursor-app`, `cyber-audit`.
-- **Needs a paid DeepAPI key** — `deepapi` (76KB, the largest file in the repo),
-  `deep-research`, `online-shopping`, `youtube-transcript`.
-- **Built for other agent runtimes** — `pi-web-search` ("ONLY for Pi Agents"),
-  `pi-custom-model`, `herdr`, `codex-subagent`, `distribute-skill-to-all-agents`.
-- **Hardcoded to the author's own infrastructure** — `read-prod-database` (his
-  Supabase role, cites "ADR 0175"), `prod-push` (his CI + Vercel project),
-  `push-skill-to-github` (his private repo at `~/.agents`),
-  `fireflies-transcript` (his API key).
-- **Upstream `hooks/`** — `deny-dangerous.sh` requires `jq` and **fails open when
-  jq is absent**, which is the case in Git Bash here (see
-  [`../hooks/README.md`](../hooks/README.md)). It also hardcodes
-  `/opt/homebrew/bin`. This template's own Python guards cover the same ground
-  and actually execute on Windows.
+A skill's description sits in context permanently once Claude can auto-invoke
+it. Fifteen of these skills are things you invoke deliberately — `/short`,
+`/remind`, `/handoff`, `/teach` — and they now carry
+`disable-model-invocation: true`, which keeps them available as `/name` while
+taking their descriptions out of the always-loaded listing.
 
-To pull in any skipped skill later, copy it out of the upstream repo into
-`.claude/skills/<name>/` — dropping the category folder.
+Two skills had the flag upstream but descriptions that describe automatic
+triggering (`before-building` — "fire the moment the user proposes a build";
+`git-worktree` — "use when starting a task in a shared repo"). The flag
+contradicted the description, so it was removed from those two.
 
-## Local edits
+Delete anything you will not use. Curation is the only real lever on this cost.
 
+## Changes from upstream
+
+- **Sanitized.** The snapshot is only partly de-personalised upstream; roughly
+  twenty remaining references to the author by name were rewritten to "the user"
+  so the skills read correctly for whoever clones this.
 - **`launch-subagent`** — upstream mandates Cursor model names ("Fable 5 Max",
-  "GPT 5.6 Sol Max Fast") and forbids Sonnet 5. Claude Code's Agent tool accepts
-  only `sonnet`/`opus`/`haiku`/`fable`, so those rules were unfollowable.
-  Rewritten to real values; also deduplicated a verbatim-repeated block and
-  dropped a reference to the un-imported `deepapi` skill.
+  "GPT 5.6 Sol Max Fast") and forbids Sonnet. Claude Code's Agent tool accepts
+  only `sonnet` / `opus` / `haiku` / `fable`, so those rules are unfollowable.
+  Rewritten to real values, with a verbatim-duplicated block removed.
 - **`folder-specific-claude-and-agents-md`** — dropped a hardcoded
-  `~/Documents/code/workspace/` path and a link to a `library/` file that does
-  not exist here. Recommends a one-line `AGENTS.md` over a symlink, since
-  symlinks need Developer Mode on Windows and do not survive `git clone`.
-- **`save-idea`** — removed an assumption that `VIDEO-IDEAS.md` continues the
-  numbering of the author's private Google Doc; both files now start at 1 and are
-  created on first use. Still writes to `~/content/`.
+  `~/Documents/code/workspace/` path and a link to a file that does not exist
+  here. Recommends a one-line `AGENTS.md` over a symlink, since symlinks need
+  Developer Mode on Windows and do not survive `git clone`.
+- **`research-prompt`, `agent-self-scheduling`, `create-readonly-db-role`** —
+  removed dependencies on the upstream author's paid API and private
+  infrastructure, so nothing here needs an account to work.
 
-## Known rough edges
+## Not imported, and why
 
-`goal-loop` and `agent-self-scheduling` each mention `cmux`, a macOS-only
-terminal, in one passing section. Harmless, left as-is.
+- **macOS-only** — `cmux`, `anti-sleep`, `macbook-metrics-setup`,
+  `nuke-cursor-app`.
+- **Needs a paid key** — `deepapi`, `deep-research`, `risky-changes`,
+  `online-shopping`, `youtube-transcript`, `fireflies-transcript`.
+- **Other agent runtimes** — `pi-web-search`, `pi-custom-model`, `herdr`,
+  `codex-subagent`, `bb-plugins`, `bb-subagents`, `corral-launch-agents`,
+  `fable-review`, `gpt-review`, `total-review`.
+- **The author's own infrastructure** — `read-prod-database`, `prod-push`,
+  `push-skill-to-github`.
+- **`save-idea`** — writes to `~/content/` for a video and podcast backlog.
+  A personal content workflow, not a coding-template concern.
+- **`global-agent-guardrails`** — good idea, superseded here. It maintains a
+  shared regex denylist across agents; this template gets the same protection
+  from `permissions.deny`, which Claude Code enforces natively and which cannot
+  fail open when an interpreter is missing.
+- **Upstream `hooks/`** — `deny-dangerous.sh` requires `jq` and **fails open
+  when jq is absent**, which is the case in Git Bash. It also hardcodes
+  `/opt/homebrew/bin`. See [`../hooks/README.md`](../hooks/README.md).
+
+To pull in a skipped skill, copy it out of the pinned upstream into
+`.claude/skills/<name>/`, dropping the category directory.

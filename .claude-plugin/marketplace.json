@@ -1,0 +1,19 @@
+{
+  "name": "cursorcanis-tools",
+  "owner": {
+    "name": "Alfredo Alea",
+    "url": "https://github.com/cursorcanis"
+  },
+  "description": "Alfredo Alea's Claude Code plugins.",
+  "plugins": [
+    {
+      "name": "claude-assisted-coding-template",
+      "source": "./",
+      "description": "Guardrails, skills, subagents and hooks for starting a Claude Code project.",
+      "version": "2.0.0",
+      "license": "MIT",
+      "category": "workflow",
+      "tags": ["template", "guardrails", "starter"]
+    }
+  ]
+}

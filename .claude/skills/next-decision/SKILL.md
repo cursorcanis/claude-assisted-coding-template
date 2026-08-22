@@ -1,6 +1,7 @@
 ---
 name: next-decision
 description: 'Drill open decisions one at a time — present the most important decision not yet clarified, give the top four choices, state a preference, ask the user. Use when the user says "next decision", "one decision at a time", or a plan has several unresolved choices. Differentiator: forward-looking; the decisions skill is retrospective (choices already made). Can be invoked with /next-decision.'
+disable-model-invocation: true
 ---
 
 Work through open decisions ONE at a time.

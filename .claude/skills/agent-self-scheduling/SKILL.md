@@ -62,7 +62,7 @@ One fast recurring tick gates many slower per-task checks: the tick reads a task
 A watchdog tick is just a command whose stdout is delivered verbatim — keep it to one cheap, unauthenticated call:
 
 ```bash
-curl -s --max-time 10 https://deepapi.co/v1/health   # alert only on non-ok
+curl -s --max-time 10 https://your-service.example.com/health   # alert only on non-ok
 ```
 
 ## Verify it fires (before reporting success)

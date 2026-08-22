@@ -1,6 +1,7 @@
 ---
 name: research-prompt
 description: Write a single-paragraph Deep Research prompt to hand to a human researcher (or a deep-research AI). Use when the user wants a research brief, a "deep research prompt", a one-paragraph task for a researcher, or asks "what should our researcher look for". Produces ONE tight paragraph with full context, numbered sub-questions, and per-finding output format.
+disable-model-invocation: true
 ---
 
 # Research Prompt
@@ -39,4 +40,4 @@ Goal: turn a vague research need into ONE self-contained paragraph that a resear
 
 ## Executing the prompt
 
-To run the finished prompt with an AI researcher, execute it via DeepAPI `POST /v1/research/deep` — follow the `deep-research` skill.
+To run the finished prompt with an AI researcher, hand it to a human, to Claude Code's bundled `/deep-research` workflow, or to any deep-research product.

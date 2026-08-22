@@ -1,3 +1,7 @@
-# Hooks run under Git Bash; CRLF breaks the shebang and line parsing.
+# Hooks run under Git Bash on Windows; CRLF breaks the shebang and line parsing.
 *.sh text eol=lf
 *.py text eol=lf
+
+# Keep instruction files diffable and consistent across platforms.
+*.md text eol=lf
+*.json text eol=lf

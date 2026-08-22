@@ -2,10 +2,30 @@
 # allowlist). Not part of the template.
 .claude/settings.local.json
 
-# Node
+# Personal project instructions, loaded alongside CLAUDE.md
+CLAUDE.local.md
+
+# Enabled MCP servers. The committed file is .mcp.json.example; the live one
+# often ends up holding real endpoints, so it stays out of git.
+.mcp.json
+
+# Dependencies
 node_modules/
+__pycache__/
+.venv/
+venv/
+target/
+bin/
+obj/
 
 # Secrets
 .env
 .env.*
 !.env.example
+!.env.sample
+!.env.template
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp

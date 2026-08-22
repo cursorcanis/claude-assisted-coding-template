@@ -1,0 +1,33 @@
+{
+  "_comment": "Plugin-mode hook wiring. Identical to the hooks block in .claude/settings.json except that paths resolve from CLAUDE_PLUGIN_ROOT instead of CLAUDE_PROJECT_DIR. settings.json is used when this repo IS the project; this file is used when it is installed as a plugin into another repo. Enable one path, not both.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard_commands.sh\"",
+            "timeout": 10,
+            "statusMessage": "Checking command safety..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/verify.sh\"",
+            "async": true,
+            "asyncRewake": true,
+            "timeout": 300,
+            "rewakeSummary": "project check failed"
+          }
+        ]
+      }
+    ]
+  }
+}

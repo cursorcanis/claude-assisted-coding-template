@@ -1,0 +1,17 @@
+{
+  "name": "claude-assisted-coding-template",
+  "displayName": "Claude Assisted Coding Template",
+  "version": "2.0.0",
+  "description": "Guardrails, skills, subagents and hooks for starting a Claude Code project. Clone it as a template, or install it as a plugin into a repo you already have.",
+  "author": {
+    "name": "Alfredo Alea",
+    "url": "https://github.com/cursorcanis"
+  },
+  "homepage": "https://github.com/cursorcanis/claude-assisted-coding-template",
+  "repository": "https://github.com/cursorcanis/claude-assisted-coding-template",
+  "license": "MIT",
+  "keywords": ["template", "guardrails", "hooks", "skills", "subagents", "starter"],
+  "skills": "./.claude/skills/",
+  "agents": "./.claude/agents/",
+  "hooks": "./.claude/hooks/hooks.json"
+}

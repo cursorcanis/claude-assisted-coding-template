@@ -1,0 +1,10 @@
+# Gitignored files copied into a new worktree so a parallel agent starts with a
+# complete checkout instead of a half-configured one. Claude Code reads this
+# when it creates a worktree.
+#
+# Local credentials are the usual reason a worktree silently fails: the code
+# is there, the .env is not. List those files here.
+.env
+.env.local
+.claude/settings.local.json
+CLAUDE.local.md

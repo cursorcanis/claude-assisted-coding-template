@@ -1,0 +1,11 @@
+# Pinned upstream for the vendored skills in this directory.
+# Diff against this commit before pulling any update.
+#
+#   git clone https://github.com/davidondrej/skills /tmp/upstream
+#   git -C /tmp/upstream checkout 648d34f54dd4ca8285ab3ee3031a1290b5f6408c
+#   diff -r /tmp/upstream/skills/<category>/<name> .claude/skills/<name>
+
+repo   = https://github.com/davidondrej/skills
+commit = 648d34f54dd4ca8285ab3ee3031a1290b5f6408c
+date   = 2026-08-22
+title  = Publish sanitized skills snapshot

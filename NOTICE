@@ -3,12 +3,17 @@ Copyright (c) 2026 Alfredo Alea
 
 Authored for this template, and covered by the root LICENSE:
 
-  .claude/settings.json          hook wiring
-  .claude/hooks/                 guard_commands.py, guard_writes.py,
-                                 verify_ts.sh, README.md
-  .claude/commands/review.md
+  CLAUDE.md
+  .claude/settings.json          permission rules and hook wiring
+  .claude/rules/                 secrets-and-config, testing, shell-and-windows
+  .claude/agents/                verifier, config-auditor
+  .claude/hooks/                 guard_commands.sh, guard_commands.py,
+                                 tests/test_guard.py,
+                                 verify.sh, session_context.sh,
+                                 hooks.json, README.md
   .claude/skills/frontend-design/
-  .gitignore, .gitattributes, README.md
+  .claude-plugin/                plugin.json, marketplace.json
+  .gitignore, .gitattributes, .worktreeinclude, .mcp.json.example, README.md
 
 --------------------------------------------------------------------------
 
@@ -19,20 +24,24 @@ davidondrej/skills
   MIT License — https://github.com/davidondrej/skills
   Full text: .claude/skills/LICENSE-davidondrej-skills
 
-  22 skills under .claude/skills/, flattened out of the upstream
-  skills/<category>/<name>/ tree:
+  23 skills under .claude/skills/, flattened out of the upstream
+  skills/<category>/<name>/ tree, vendored at the commit pinned in
+  .claude/skills/UPSTREAM.lock:
 
-    agent-self-scheduling   before-building        brain-to-docs
-    create-readonly-db-role decisions              effective-agent-skills
+    agent-self-scheduling   ask-then-build         before-building
+    brain-to-docs           create-readonly-db-role
+    decisions               effective-agent-skills
     folder-specific-claude-and-agents-md           git-worktree
     goal-loop               google-safe-browsing   handoff
     launch-subagent         level-up               next-decision
     prompt-me               read-all-adrs          remind
-    research-prompt         save-idea              setup-help
-    short                   teach
+    research-prompt         setup-help             short
+    stop-overthinking       teach
 
-  Modified by Alfredo Alea, 2026-08-04, for Windows + Claude Code
-  compatibility. Three skills carry substantive changes — launch-subagent,
-  folder-specific-claude-and-agents-md, and save-idea. The modifications are
-  described in .claude/skills/README.md and remain under the upstream MIT
-  license; they are derivative works, not original to this template.
+  Modified by Alfredo Alea, 2026-08-22, for Windows and Claude Code
+  compatibility: personal references sanitized, paid-API and private-
+  infrastructure dependencies removed, model names corrected, and
+  disable-model-invocation applied to manually-invoked skills. The
+  modifications are described in .claude/skills/README.md and remain under
+  the upstream MIT license; they are derivative works, not original to this
+  template.
